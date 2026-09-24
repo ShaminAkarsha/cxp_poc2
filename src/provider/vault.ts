@@ -13,6 +13,13 @@ import type { KeyObject } from "node:crypto";
 import { encodeB64url } from "../cxf/b64url.js";
 
 export interface StoredPasskey {
+  /**
+   * CXF Item ID for this passkey: random, fixed at creation. CXF §1.3: IDs
+   * SHOULD be stable across exports and SHOULD NOT contain PII; a random ID
+   * (rather than one derived from the credential ID) also stops an RP from
+   * recognising its own passkey among the archive's file names (GAP-18).
+   */
+  readonly itemId: string;
   readonly credentialId: Uint8Array;
   readonly rpId: string;
   readonly userHandle: Uint8Array;

@@ -15,7 +15,8 @@
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "demo:baseline": "tsx src/cli/demo-baseline.ts",
     "rp": "tsx src/rp/main.ts",
-    "demo:exchange": "tsx src/cli/demo-exchange.ts"
+    "demo:exchange": "tsx src/cli/demo-exchange.ts",
+    "demo:migrate": "tsx src/cli/demo-migrate.ts"
   },
   "dependencies": {
     "@hpke/core": "^1.9.0",

@@ -163,6 +163,7 @@ export class SoftwareAuthenticator {
     const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
     const credentialId = new Uint8Array(randomBytes(CREDENTIAL_ID_BYTES));
     const record: StoredPasskey = {
+      itemId: encodeB64url(new Uint8Array(randomBytes(16))),
       credentialId,
       rpId,
       userHandle,

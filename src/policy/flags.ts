@@ -88,6 +88,18 @@ export const POLICY_FLAGS = {
     gap: "GAP-22",
     hardened: "Header.exporterRpId must equal ExportResponse.exporter and the confirmed identity",
   },
+  requireExportConsent: {
+    gap: "GAP-29",
+    hardened: "User sees importer, SAS, types and count, re-authenticates, and approves the exact request",
+  },
+  rejectConflictingImport: {
+    gap: "GAP-30",
+    hardened: "An imported credential never silently replaces an existing one",
+  },
+  secureExportFiles: {
+    gap: "GAP-31",
+    hardened: "Indirect-mode files are 0600 and removed after use",
+  },
 } as const satisfies Record<string, PolicyFlagDefinition>;
 
 export type PolicyFlag = keyof typeof POLICY_FLAGS;
