@@ -22,7 +22,7 @@ export function isB64url(value: string): boolean {
   return /^={1,2}$/.test(padding) && value.length % 4 === 0 && padding.length === (4 - (body.length % 4)) % 4;
 }
 
-export function decodeB64url(value: string): Uint8Array {
+export function decodeB64url(value: string): Uint8Array<ArrayBuffer> {
   return new Uint8Array(Buffer.from(value, "base64url"));
 }
 

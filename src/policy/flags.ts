@@ -106,4 +106,8 @@ export const GAPS_WITHOUT_FLAG: Readonly<Record<GapId, string>> = {
   "GAP-18": "Hardened behaviour is realised by the GAP-08 flag (randomizeFileNames)",
   "GAP-23": "Editorial defect; both profiles use the only coherent reading",
   "GAP-24": "Both profiles use CXP version 0; affects A-05 design, not runtime behaviour",
+  "GAP-25": "No conformant CXF field for BE/BS exists; both authenticators report BE=1, BS=1",
+  "GAP-26": "CDDL/prose conflicts resolved by following the prose in both profiles",
+  "GAP-27": "Both profiles apply DEFLATE to zip entries; inflation limits are GAP-12",
+  "GAP-28": "Both profiles define correspondence as equal mode/kem/kdf/aead",
 };
