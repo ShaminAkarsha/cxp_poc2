@@ -11,7 +11,8 @@ import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createExportResponse } from "../../src/cxp/index.js";
 import { decodeB64url, encodeB64url, isPasskey, parseCxfHeader, type Header } from "../../src/cxf/index.js";
-import { getPolicy, PROFILE_NAMES, type Policy } from "../../src/policy/index.js";
+import { createLoopbackTls, type LoopbackTls } from "../../src/crypto/test-ca.js";
+import { getPolicy, isEnabled, PROFILE_NAMES, type Policy } from "../../src/policy/index.js";
 import { SoftwareAuthenticator } from "../../src/provider/authenticator.js";
 import {
   DIRECT_EXPORT_PATH,
@@ -45,15 +46,24 @@ function setup(policy: Policy) {
   const authA = new SoftwareAuthenticator(vaultA);
   register(authA, "alice", 2);
   register(authA, "bob", 3);
+  const vaultB = new Vault();
+  // A simulated user who approves when the two providers' fingerprints match (hardened prompts).
+  // eslint-disable-next-line prefer-const -- referenced from the exporter's prompt, assigned below
+  let importer: ImportingProvider;
   const exporter = new ExportingProvider({
     rpId: "provider-a.example",
     displayName: "Provider A",
     vault: vaultA,
     policy,
     account: { username: "alice", email: "alice@example.test" },
+    approveExport: (p) => p.requestFingerprint === undefined || p.requestFingerprint === importer.requestFingerprint,
   });
-  const vaultB = new Vault();
-  const importer = new ImportingProvider({ rpId: "provider-b.example", vault: vaultB, policy });
+  importer = new ImportingProvider({
+    rpId: "provider-b.example",
+    vault: vaultB,
+    policy,
+    confirmExporter: async (c) => c.fingerprint === (await exporter.keyFingerprint()),
+  });
   return { vaultA, authA, exporter, vaultB, importer, authB: new SoftwareAuthenticator(vaultB) };
 }
 
@@ -160,34 +170,41 @@ describe.each(PROFILE_NAMES)("direct mode under %s (CXP §3.2.2)", (profile) => 
   const policy = getPolicy(profile);
   let service: RunningExporterService;
   let ctx: ReturnType<typeof setup>;
+  let tls: LoopbackTls | undefined;
+  const client = () => (tls ? { caPem: tls.caPem } : {});
 
   beforeEach(async () => {
     ctx = setup(policy);
-    service = await startExporterService(ctx.exporter);
+    // GAP-19 (hardened): HTTPS with a pinned test CA.
+    tls = isEnabled(policy, "requireTls") ? await createLoopbackTls() : undefined;
+    service = await startExporterService(ctx.exporter, tls ? { tls } : {});
   });
   afterEach(async () => {
     await service.close();
   });
 
   it("migrates over loopback HTTP", async () => {
-    expect(service.url.startsWith("http://127.0.0.1:")).toBe(true);
-    const report = await importDirect(ctx.importer, service.url);
+    expect(service.url).toMatch(/^https?:\/\/127\.0\.0\.1:/);
+    const report = await importDirect(ctx.importer, service.url, client());
     expect(report.imported).toHaveLength(2);
     expectMigrated(ctx.vaultA, ctx.vaultB, ctx.authB);
   });
 
   it("answers with an error over the same transport (GAP-23)", async () => {
     const request = await ctx.importer.createRequest("direct");
-    await expect(submitDirectRequest(service.url, { ...request, hpke: [] })).rejects.toThrow(/400/);
-    await expect(submitDirectRequest(service.url, { ...request, mode: "indirect" })).rejects.toThrow(DirectModeError);
-    await expect(submitDirectRequest(service.url, { ...request, mode: "self" })).rejects.toThrow(/self/);
-    await expect(submitDirectRequest(service.url, { ...request, archive: ["zstd"] })).rejects.toThrow(/archive/);
-    const raw = await fetch(new URL(DIRECT_EXPORT_PATH, service.url), {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: "{not json",
-    });
-    expect(raw.status).toBe(400);
+    const submit = (body: unknown) => submitDirectRequest(service.url, body, client());
+    await expect(submit({ ...request, hpke: [] })).rejects.toThrow(/400/);
+    await expect(submit({ ...request, mode: "indirect" })).rejects.toThrow(DirectModeError);
+    await expect(submit({ ...request, mode: "self" })).rejects.toThrow(/self/);
+    await expect(submit({ ...request, archive: ["zstd"] })).rejects.toThrow(/archive/);
+    if (tls === undefined) {
+      const raw = await fetch(new URL(DIRECT_EXPORT_PATH, service.url), {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{not json",
+      });
+      expect(raw.status).toBe(400);
+    }
   });
 });
 

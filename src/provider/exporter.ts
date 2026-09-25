@@ -2,12 +2,17 @@
  * Exporting provider (CXP §2.1 "Exporter"): turns its vault into a CXF
  * document scoped by the Export Request, and answers with an Export Response.
  *
- * Hardened behaviours (consent GAP-29, identity binding GAP-05/22, file
- * handling GAP-31, ...) are implemented in M7. Here: spec-minimal — the
- * exporter answers any well-formed request (GAP-29: supplying the request is
- * the approval).
+ * spec-minimal: answers any well-formed request (GAP-29: supplying the request
+ * is the approval). hardened: asks the user first (GAP-05/06/29), signs with a
+ * static HPKE key in auth mode (GAP-14), and writes private files (GAP-31).
  */
 import { randomBytes } from "node:crypto";
+import { generateKeyPair, MTI_SUITE, publicKeyToJwk } from "../crypto/hpke.js";
+import { keyFingerprint, requestFingerprint } from "../cxp/binding.js";
+import { capabilitiesFor, selectArchive, selectHpkeParameters } from "../cxp/negotiate.js";
+import { CxpRejectedError } from "../cxp/response.js";
+import { CxpNegotiationError } from "../cxp/schema.js";
+import { isEnabled } from "../policy/index.js";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
@@ -32,7 +37,25 @@ export interface ExportingProviderConfig {
   readonly account: { readonly username: string; readonly email: string; readonly fullName?: string };
   /** UNIX seconds; injectable for tests. */
   readonly now?: () => number;
+  /**
+   * The credential owner's decision on an export (hardened: GAP-05/06/29).
+   * Stands for a confirmation screen after user verification.
+   */
+  readonly approveExport?: (prompt: ExportConsentPrompt) => Promise<boolean> | boolean;
 }
+
+/** What the user is shown before an export (GAP-29 hardened column). */
+export interface ExportConsentPrompt {
+  /** Claimed by the request; not authenticated (GAP-05). */
+  readonly importer: string;
+  /** Fingerprint of the received request, to compare with the importer's display (GAP-05/06). */
+  readonly requestFingerprint?: string;
+  readonly credentialTypes: readonly string[] | "all";
+  readonly itemCount: number;
+  readonly channel: ExportChannel;
+}
+
+export type ExportChannel = "direct" | "file";
 
 export interface ExportReport {
   readonly exported: number;
@@ -49,6 +72,8 @@ export class ExportingProvider {
   readonly config: ExportingProviderConfig;
   /** CXF §1.3: a machine-generated Account ID, stable across exports. */
   readonly accountId = encodeB64url(new Uint8Array(randomBytes(16)));
+  /** Static HPKE key for auth mode (GAP-14), created on first use. */
+  #staticKey: Promise<CryptoKeyPair> | undefined;
 
   constructor(config: ExportingProviderConfig) {
     this.config = config;
@@ -127,28 +152,84 @@ export class ExportingProvider {
     };
   }
 
+  #on(flag: Parameters<typeof isEnabled>[1]): boolean {
+    return isEnabled(this.config.policy, flag);
+  }
+
+  #senderKey(): Promise<CryptoKeyPair> {
+    this.#staticKey ??= generateKeyPair(MTI_SUITE.kem);
+    return this.#staticKey;
+  }
+
+  /**
+   * GAP-14 (hardened): fingerprint of this exporter's static key, which the
+   * exporter displays so the user can confirm it at the importer.
+   */
+  async keyFingerprint(): Promise<string> {
+    const jwk = await publicKeyToJwk(MTI_SUITE.kem, (await this.#senderKey()).publicKey);
+    return keyFingerprint(jwk as Record<string, unknown>);
+  }
+
+  /**
+   * Hardened: ask the user before exporting. GAP-29 always prompts; GAP-05
+   * (direct) and GAP-06 (file) add the request fingerprint to the prompt.
+   */
+  async #obtainConsent(request: ExportRequest, report: ExportReport, channel: ExportChannel): Promise<void> {
+    const showFingerprint = channel === "direct" ? this.#on("requireSasConfirmation") : this.#on("confirmRequestFileKey");
+    if (!this.#on("requireExportConsent") && !showFingerprint) return; // GAP-29 (spec-minimal)
+    const prompt: ExportConsentPrompt = {
+      importer: request.importer,
+      ...(showFingerprint ? { requestFingerprint: requestFingerprint(request) } : {}),
+      credentialTypes: request.credentialTypes ?? "all",
+      itemCount: report.exported,
+      channel,
+    };
+    if ((await this.config.approveExport?.(prompt)) !== true) {
+      throw new CxpRejectedError("export was not approved by the credential owner (GAP-29)");
+    }
+  }
+
   /** Answer an Export Request (any source). */
-  async respond(input: unknown): Promise<{ response: ExportResponse; report: ExportReport }> {
+  async respond(
+    input: unknown,
+    channel: ExportChannel = "direct",
+  ): Promise<{ response: ExportResponse; report: ExportReport }> {
     const request = parseExportRequest(input);
+    // Fail fast: never ask the user about an export that cannot be served.
+    const capabilities = capabilitiesFor(this.config.policy);
+    if (selectHpkeParameters(request.hpke, capabilities) === undefined) {
+      throw new CxpNegotiationError("no mutually supported HPKE parameters");
+    }
+    if (selectArchive(request.archive, capabilities) === undefined) {
+      throw new CxpNegotiationError("no mutually supported archive algorithm");
+    }
     const { header, report } = this.buildCxf(request);
-    const response = await createExportResponse({ request, header, exporter: this.config.rpId });
+    await this.#obtainConsent(request, report, channel);
+    const response = await createExportResponse({
+      request,
+      header,
+      exporter: this.config.rpId,
+      policy: this.config.policy,
+      ...(this.#on("requireHpkeAuthMode") ? { senderKey: await this.#senderKey() } : {}),
+    });
     return { response, report };
   }
 
   /**
    * `indirect` mode: read the request file the credential owner supplied
    * (CXP §3.2.1) and write the response to the filesystem (CXP §3.2.2 MUST).
-   * GAP-31 (spec-minimal): default permissions, nothing removed afterwards.
+   * GAP-31: spec-minimal uses default permissions; hardened writes 0600.
    */
   async exportToFile(
     requestPath: string,
     outDir: string,
   ): Promise<{ responsePath: string; response: ExportResponse; report: ExportReport }> {
     const request = parseExportRequestJson(await readFile(requestPath, "utf8"));
-    const { response, report } = await this.respond(request);
+    const { response, report } = await this.respond(request, "file");
     await mkdir(outDir, { recursive: true });
     const responsePath = join(outDir, `${RESPONSE_FILE_PREFIX}${this.#now()}.json`);
-    await writeFile(responsePath, serializeExportResponse(response));
+    // GAP-31 (hardened): owner-only permissions.
+    await writeFile(responsePath, serializeExportResponse(response), this.#on("secureExportFiles") ? { mode: 0o600 } : {});
     return { responsePath, response, report };
   }
 }

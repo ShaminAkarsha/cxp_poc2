@@ -1,0 +1,21 @@
+Everything runs from the project folder in the terminal:
+
+cd "/Users/akarshashamin/UCSC/4th year/1st semester/The resaerch/cxp_poc2"
+pnpm install        # first time only: downloads the libraries
+pnpm test           # runs all 75 tests
+pnpm check          # typecheck + lint + tests together (use this before committing work)
+
+
+pnpm test test/cxf/validation.test.ts   # run just one test file
+pnpm test -t "GAP-20"                   # run only tests whose name contains "GAP-20"
+pnpm test:watch                         # re-run tests automatically each time you save
+
+pnpm demo:exchange                  # Export Request travel from importer to exporter
+
+
+pnpm demo:migrate                    # indirect: via files, kept in out/indirect/ so you can open them
+pnpm demo:migrate --mode direct      # direct: over HTTP on 127.0.0.1
+
+pnpm demo:e2e                 # indirect mode (via files)
+pnpm demo:e2e --mode direct   # direct mode (HTTP on loopback)
+

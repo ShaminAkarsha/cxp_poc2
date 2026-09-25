@@ -3,6 +3,8 @@
  * private keys. The importer starts the flow (CXP §2 step 1).
  */
 import { AEAD, generateKeyPair, KDF, KEM, MTI_SUITE, publicKeyToJwk, type SuiteIds } from "../crypto/hpke.js";
+import { isEnabled, type Policy } from "../policy/index.js";
+import { newChallenge } from "./binding.js";
 import { ARCHIVE_DEFLATE, CXP_VERSION, type ExportRequest, type HpkeParameters, type ResponseMode } from "./schema.js";
 
 /** Importer HPKE preference order: the MTI suite, then P-256 for interoperability. */
@@ -37,14 +39,24 @@ export interface CreateExportRequestOptions {
   readonly credentialTypes?: readonly string[];
   readonly knownExtensions?: readonly string[];
   readonly version?: number;
+  /** Profile; without one the request is built as in spec-minimal. */
+  readonly policy?: Policy;
 }
 
 export async function createExportRequest(
   options: CreateExportRequestOptions,
 ): Promise<{ request: ExportRequest; keyring: ImporterKeyring }> {
+  const policy = options.policy;
+  const on = (flag: Parameters<typeof isEnabled>[1]) => policy !== undefined && isEnabled(policy, flag);
+  let suites = options.suites ?? DEFAULT_IMPORTER_SUITES;
+  // GAP-02 (hardened): offer only the mandatory-to-implement suite.
+  if (on("enforceMandatorySuite")) suites = [MTI_SUITE];
+  // GAP-14 (hardened): HPKE auth mode, so the exporter is authenticated.
+  const hpkeMode = on("requireHpkeAuthMode") ? "auth" : "base";
+
   const keyring = new ImporterKeyring();
   const hpke: HpkeParameters[] = [];
-  for (const suite of options.suites ?? DEFAULT_IMPORTER_SUITES) {
+  for (const suite of suites) {
     let keyPair = keyring.get(suite.kem);
     if (keyPair === undefined) {
       keyPair = await generateKeyPair(suite.kem);
@@ -52,7 +64,7 @@ export async function createExportRequest(
     }
     // CXP §3.2 (MUST) parameters carry the public key they need; §3.5.1 `key` as a JWK.
     const key = await publicKeyToJwk(suite.kem, keyPair.publicKey);
-    hpke.push({ mode: "base", ...suite, key: { kty: key.kty ?? "", ...key } });
+    hpke.push({ mode: hpkeMode, ...suite, key: { kty: key.kty ?? "", ...key } });
   }
 
   const request: ExportRequest = {
@@ -63,6 +75,8 @@ export async function createExportRequest(
     importer: options.importer,
     ...(options.credentialTypes ? { credentialTypes: [...options.credentialTypes] } : {}),
     ...(options.knownExtensions ? { knownExtensions: [...options.knownExtensions] } : {}),
+    // GAP-01 (hardened): a fresh challenge makes every request, and so its digest, unique.
+    ...(on("bindRequestChallenge") ? { challenge: newChallenge() } : {}),
   };
   return { request, keyring };
 }

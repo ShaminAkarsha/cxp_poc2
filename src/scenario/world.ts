@@ -6,7 +6,8 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { Policy } from "../policy/index.js";
+import { createLoopbackTls } from "../crypto/test-ca.js";
+import { isEnabled, type Policy } from "../policy/index.js";
 import { SoftwareAuthenticator } from "../provider/authenticator.js";
 import { importDirect, startExporterService } from "../provider/direct.js";
 import { ExportingProvider } from "../provider/exporter.js";
@@ -37,10 +38,23 @@ export interface World {
   close(): Promise<void>;
 }
 
-export async function createWorld(policy: Policy): Promise<World> {
+/**
+ * The simulated credential owner (hardened: GAP-05/06/14/29). They read the
+ * fingerprint each provider displays and approve only when the two match.
+ */
+export interface SimulatedUser {
+  /** Set to false to model a user who declines every prompt. */
+  willing: boolean;
+  readonly prompts: string[];
+}
+
+export async function createWorld(policy: Policy): Promise<World & { user: SimulatedUser }> {
   const rp = await startDemoRp();
   const vaultA = new Vault();
   const vaultB = new Vault();
+  const user: SimulatedUser = { willing: true, prompts: [] };
+  // eslint-disable-next-line prefer-const -- assigned below; the closures run later
+  let providerB: ProviderB;
   const providerA: ProviderA = {
     vault: vaultA,
     authenticator: new SoftwareAuthenticator(vaultA),
@@ -50,12 +64,27 @@ export async function createWorld(policy: Policy): Promise<World> {
       vault: vaultA,
       policy,
       account: { username: "alice", email: "alice@example.test" },
+      // Provider A's prompt vs the fingerprint Provider B displayed for its request.
+      approveExport: (prompt) => {
+        user.prompts.push(`export to ${prompt.importer}: ${prompt.itemCount} item(s), fingerprint ${prompt.requestFingerprint ?? "-"}`);
+        const shown = providerB.importer.requestFingerprint;
+        return user.willing && (prompt.requestFingerprint === undefined || prompt.requestFingerprint === shown);
+      },
     }),
   };
-  const providerB: ProviderB = {
+  providerB = {
     vault: vaultB,
     authenticator: new SoftwareAuthenticator(vaultB),
-    importer: new ImportingProvider({ rpId: "provider-b.example", vault: vaultB, policy }),
+    importer: new ImportingProvider({
+      rpId: "provider-b.example",
+      vault: vaultB,
+      policy,
+      // Provider B's prompt vs the fingerprint Provider A displays for its own key.
+      confirmExporter: async (confirmation) => {
+        user.prompts.push(`trust ${confirmation.exporter}: fingerprint ${confirmation.fingerprint}`);
+        return user.willing && confirmation.fingerprint === (await providerA.exporter.keyFingerprint());
+      },
+    }),
   };
   return {
     policy,
@@ -63,6 +92,7 @@ export async function createWorld(policy: Policy): Promise<World> {
     rpClient: new RpHttpClient(rp.url, rp.rp.config.origin),
     providerA,
     providerB,
+    user,
     close: () => rp.close(),
   };
 }
@@ -74,9 +104,11 @@ export async function migrate(world: World, mode: MigrationMode, workDir?: strin
   const { exporter } = world.providerA;
   const { importer } = world.providerB;
   if (mode === "direct") {
-    const service = await startExporterService(exporter);
+    // GAP-19 (hardened): HTTPS with a per-run test CA.
+    const tls = isEnabled(world.policy, "requireTls") ? await createLoopbackTls() : undefined;
+    const service = await startExporterService(exporter, tls ? { tls } : {});
     try {
-      return await importDirect(importer, service.url);
+      return await importDirect(importer, service.url, tls ? { caPem: tls.caPem } : {});
     } finally {
       await service.close();
     }

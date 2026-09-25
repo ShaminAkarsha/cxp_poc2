@@ -4,13 +4,16 @@
  * (CXP §3.2), and "it is up to the Exporting Provider to select" a mutually
  * supported entry. An honest exporter takes the importer's first usable entry.
  */
-import { HPKE_MODES, isSupportedSuite, type HpkeModeName } from "../crypto/hpke.js";
+import { HPKE_MODES, isSupportedSuite, MTI_SUITE, type HpkeModeName, type SuiteIds } from "../crypto/hpke.js";
+import { isEnabled, type Policy } from "../policy/index.js";
 import { jweEncForAead } from "../crypto/jwe.js";
 import { ARCHIVE_DEFLATE, type HpkeParameters } from "./schema.js";
 
 export interface ExporterCapabilities {
   readonly hpkeModes: readonly HpkeModeName[];
   readonly archives: readonly string[];
+  /** When set, only these suites are acceptable (GAP-02). */
+  readonly suites?: readonly SuiteIds[];
 }
 
 /** spec-minimal: `base` mode (README §5); `auth` is added for hardened in M7 (GAP-14). */
@@ -21,6 +24,23 @@ export const DEFAULT_EXPORTER_CAPABILITIES: ExporterCapabilities = {
 
 function isModeName(mode: string): mode is HpkeModeName {
   return Object.hasOwn(HPKE_MODES, mode);
+}
+
+const sameSuite = (a: SuiteIds, b: SuiteIds) => a.kem === b.kem && a.kdf === b.kdf && a.aead === b.aead;
+
+/** Exporter capabilities for a profile. */
+export function capabilitiesFor(policy: Policy): ExporterCapabilities {
+  return {
+    // GAP-14 (hardened): auth mode only.
+    hpkeModes: isEnabled(policy, "requireHpkeAuthMode") ? ["auth"] : ["base"],
+    archives: [ARCHIVE_DEFLATE],
+    // GAP-02 (hardened): the mandatory-to-implement suite only.
+    ...(isEnabled(policy, "enforceMandatorySuite") ? { suites: [MTI_SUITE] } : {}),
+  };
+}
+
+export function isAllowedSuite(capabilities: ExporterCapabilities, suite: SuiteIds): boolean {
+  return capabilities.suites === undefined || capabilities.suites.some((s) => sameSuite(s, suite));
 }
 
 /**
@@ -38,6 +58,7 @@ export function selectHpkeParameters(
       isModeName(p.mode) &&
       capabilities.hpkeModes.includes(p.mode) &&
       isSupportedSuite(p) &&
+      isAllowedSuite(capabilities, p) &&
       jweEncForAead(p.aead) !== undefined &&
       p.key !== undefined,
   );
