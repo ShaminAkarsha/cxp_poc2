@@ -32,7 +32,7 @@
       "GAP-19"
     ],
     "threats": [
-      "T-ER-02"
+      "T-ER-01"
     ],
     "results": {
       "spec-minimal": {
@@ -58,7 +58,8 @@
       "GAP-31"
     ],
     "threats": [
-      "T-ER-03"
+      "T-RS-01a",
+      "T-IM-03"
     ],
     "results": {
       "spec-minimal": {
@@ -83,14 +84,14 @@
       "GAP-03"
     ],
     "threats": [
-      "T-ER-04"
+      "T-ER-03a"
     ],
     "results": {
       "spec-minimal": {
         "expected": "succeeds",
         "observed": "succeeded",
         "pass": true,
-        "evidence": "forced non-MTI suite (KEM 16), imported 1 credential(s)"
+        "evidence": "adversary controlled suite selection (KEM 16); negotiation integrity absent, imported 1 credential(s)"
       },
       "hardened": {
         "expected": "fails",
@@ -108,7 +109,7 @@
       "GAP-24"
     ],
     "threats": [
-      "T-ER-05"
+      "T-ER-03b"
     ],
     "results": {
       "spec-minimal": {
@@ -133,7 +134,8 @@
       "GAP-09"
     ],
     "threats": [
-      "T-ER-06"
+      "T-RS-03a",
+      "T-EX-06"
     ],
     "results": {
       "spec-minimal": {
@@ -146,7 +148,7 @@
         "expected": "fails",
         "observed": "rejected",
         "pass": true,
-        "evidence": "CXP-Export/documents/ocTuME6YGDwaoeGc_VxAoQ.jwe does not match the manifest"
+        "evidence": "CXP-Export/documents/dmmmJATOIoPnBz1KLYUVUQ.jwe does not match the manifest"
       }
     }
   },
@@ -158,7 +160,8 @@
       "GAP-30"
     ],
     "threats": [
-      "T-ER-07"
+      "T-RS-02",
+      "T-IM-03"
     ],
     "results": {
       "spec-minimal": {
@@ -182,7 +185,8 @@
       "GAP-12"
     ],
     "threats": [
-      "T-ER-08"
+      "T-RS-06a",
+      "T-IM-02c"
     ],
     "results": {
       "spec-minimal": {
@@ -206,7 +210,8 @@
       "GAP-13"
     ],
     "threats": [
-      "T-ER-09"
+      "T-IM-01",
+      "T-EX-05a"
     ],
     "results": {
       "spec-minimal": {
@@ -231,7 +236,8 @@
       "GAP-17"
     ],
     "threats": [
-      "T-ER-10"
+      "T-IM-04a",
+      "T-IM-04b"
     ],
     "results": {
       "spec-minimal": {
@@ -255,7 +261,7 @@
       "GAP-16"
     ],
     "threats": [
-      "T-ER-11"
+      "T-IM-04c"
     ],
     "results": {
       "spec-minimal": {
@@ -280,14 +286,15 @@
       "GAP-18"
     ],
     "threats": [
-      "T-ER-12"
+      "T-RS-05a",
+      "T-ER-06a"
     ],
     "results": {
       "spec-minimal": {
         "expected": "succeeds",
         "observed": "succeeded",
         "pass": true,
-        "evidence": "file names expose Item IDs: CXP-Export/documents/crO22SMX_lyr8BqHaH-bUw.jwe, CXP-Export/documents/MO6T_UCL22AyfKy3qJsC9g.jwe"
+        "evidence": "file names expose Item IDs: CXP-Export/documents/E2t6ckZcoYEfCjfEvtqTWw.jwe, CXP-Export/documents/bQZpWy6vtItoZAMTNjRLIg.jwe"
       },
       "hardened": {
         "expected": "reduced",
@@ -306,7 +313,9 @@
       "GAP-29"
     ],
     "threats": [
-      "T-ER-13"
+      "T-EX-01b",
+      "T-EX-02a",
+      "T-ER-02a"
     ],
     "results": {
       "spec-minimal": {
@@ -320,6 +329,126 @@
         "observed": "rejected",
         "pass": true,
         "evidence": "export was not approved by the credential owner (GAP-29)"
+      }
+    }
+  },
+  {
+    "id": "A-14",
+    "title": "Scope tampering: remove credentialTypes from the request",
+    "gaps": [
+      "GAP-32"
+    ],
+    "threats": [
+      "T-ER-03c"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "scope tampering undetected; passkey-only=1, all-types=2; exporter served 1 credential(s)"
+      },
+      "hardened": {
+        "expected": "fails",
+        "observed": "rejected",
+        "pass": true,
+        "evidence": "export was not approved by the credential owner (GAP-29)"
+      }
+    }
+  },
+  {
+    "id": "A-18",
+    "title": "Silent exclusion of a passkey with a non-zero signature counter",
+    "gaps": [
+      "GAP-36"
+    ],
+    "threats": [
+      "T-EX-04"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-36 not implemented)"
+      },
+      "hardened": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-36 not implemented)"
+      }
+    }
+  },
+  {
+    "id": "A-20",
+    "title": "Stale CXF document accepted without freshness check",
+    "gaps": [
+      "GAP-21"
+    ],
+    "threats": [
+      "T-IM-02b"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "stale CXF document (timestamp 2h old) accepted without freshness check"
+      },
+      "hardened": {
+        "expected": "fails",
+        "observed": "rejected",
+        "pass": true,
+        "evidence": "CXF document predates the Export Request (GAP-21)"
+      }
+    }
+  },
+  {
+    "id": "A-21",
+    "title": "Exporter identity mismatch between CXP envelope and CXF header",
+    "gaps": [
+      "GAP-22"
+    ],
+    "threats": [
+      "T-RS-04"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "CXP exporter=\"adversary.example\" vs CXF exporterRpId=\"provider-a.example\"; mismatch accepted"
+      },
+      "hardened": {
+        "expected": "fails",
+        "observed": "rejected",
+        "pass": true,
+        "evidence": "CXF exporterRpId provider-a.example differs from response exporter adversary.example (GAP-22)"
+      }
+    }
+  },
+  {
+    "id": "A-22",
+    "title": "Malformed CXF document violating producer MUSTs",
+    "gaps": [
+      "GAP-20"
+    ],
+    "threats": [
+      "T-IM-02a"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "malformed CXF accepted at protocol level; 1 credential(s) skipped as invalid at import"
+      },
+      "hardened": {
+        "expected": "fails",
+        "observed": "rejected",
+        "pass": true,
+        "evidence": "CXF document violates producer requirements (GAP-20):\n  $.version.major: unsupported CXF major version (expected 1)\n  $.accounts[0].items[0].credentials[0].key: key is not PKCS#8 DER (CXF §3.3.12)"
       }
     }
   }

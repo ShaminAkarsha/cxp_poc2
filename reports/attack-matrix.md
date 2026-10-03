@@ -1,6 +1,6 @@
 # Attack Matrix
 
-Generated: 2026-10-03T07:52:42.397Z
+Generated: 2026-10-03T18:19:22.634Z
 
 | ID | Scenario | Gaps | spec-minimal | hardened |
 |---|---|---|---|---|
@@ -17,6 +17,11 @@ Generated: 2026-10-03T07:52:42.397Z
 | A-11 | PRF seed reuse across two importers | GAP-16 | ✓ succeeded | ✓ succeeded |
 | A-12 | Metadata observable to a passive observer of the Export Response | GAP-08, GAP-18 | ✓ succeeded | ✓ reduced |
 | A-13 | Consent phishing: victim approves an attacker-crafted Export Request | GAP-05, GAP-06, GAP-29 | ✓ succeeded | ✓ rejected |
+| A-14 | Scope tampering: remove credentialTypes from the request | GAP-32 | ✓ succeeded | ✓ rejected |
+| A-18 | Silent exclusion of a passkey with a non-zero signature counter | GAP-36 | ✓ succeeded | ✓ succeeded |
+| A-20 | Stale CXF document accepted without freshness check | GAP-21 | ✓ succeeded | ✓ rejected |
+| A-21 | Exporter identity mismatch between CXP envelope and CXF header | GAP-22 | ✓ succeeded | ✓ rejected |
+| A-22 | Malformed CXF document violating producer MUSTs | GAP-20 | ✓ succeeded | ✓ rejected |
 
 ## Evidence
 
@@ -37,7 +42,7 @@ Generated: 2026-10-03T07:52:42.397Z
 
 ### A-04: HPKE suite / archive negotiation tampering
 
-- **spec-minimal**: succeeded — forced non-MTI suite (KEM 16), imported 1 credential(s)
+- **spec-minimal**: succeeded — adversary controlled suite selection (KEM 16); negotiation integrity absent, imported 1 credential(s)
 - **hardened**: rejected — only the MTI suite was offered; nothing to downgrade
 
 ### A-05: Protocol version downgrade
@@ -48,7 +53,7 @@ Generated: 2026-10-03T07:52:42.397Z
 ### A-06: Swapping or reordering files inside the archive
 
 - **spec-minimal**: succeeded — swapped archive imported 2 credential(s)
-- **hardened**: rejected — CXP-Export/documents/ocTuME6YGDwaoeGc_VxAoQ.jwe does not match the manifest
+- **hardened**: rejected — CXP-Export/documents/dmmmJATOIoPnBz1KLYUVUQ.jwe does not match the manifest
 
 ### A-07: Credential injection by an unauthenticated exporter
 
@@ -77,10 +82,37 @@ Generated: 2026-10-03T07:52:42.397Z
 
 ### A-12: Metadata observable to a passive observer of the Export Response
 
-- **spec-minimal**: succeeded — file names expose Item IDs: CXP-Export/documents/crO22SMX_lyr8BqHaH-bUw.jwe, CXP-Export/documents/MO6T_UCL22AyfKy3qJsC9g.jwe
+- **spec-minimal**: succeeded — file names expose Item IDs: CXP-Export/documents/E2t6ckZcoYEfCjfEvtqTWw.jwe, CXP-Export/documents/bQZpWy6vtItoZAMTNjRLIg.jwe
 - **hardened**: reduced — file names randomized; 2 file sizes still observable
 
 ### A-13: Consent phishing: victim approves an attacker-crafted Export Request
 
 - **spec-minimal**: succeeded — adversary's request served without consent, 1 credential(s)
 - **hardened**: rejected — export was not approved by the credential owner (GAP-29)
+
+### A-14: Scope tampering: remove credentialTypes from the request
+
+- **spec-minimal**: succeeded — scope tampering undetected; passkey-only=1, all-types=2; exporter served 1 credential(s)
+- **hardened**: rejected — export was not approved by the credential owner (GAP-29)
+
+### A-18: Silent exclusion of a passkey with a non-zero signature counter
+
+- **spec-minimal**: succeeded — 1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-36 not implemented)
+- **hardened**: succeeded — 1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-36 not implemented)
+
+### A-20: Stale CXF document accepted without freshness check
+
+- **spec-minimal**: succeeded — stale CXF document (timestamp 2h old) accepted without freshness check
+- **hardened**: rejected — CXF document predates the Export Request (GAP-21)
+
+### A-21: Exporter identity mismatch between CXP envelope and CXF header
+
+- **spec-minimal**: succeeded — CXP exporter="adversary.example" vs CXF exporterRpId="provider-a.example"; mismatch accepted
+- **hardened**: rejected — CXF exporterRpId provider-a.example differs from response exporter adversary.example (GAP-22)
+
+### A-22: Malformed CXF document violating producer MUSTs
+
+- **spec-minimal**: succeeded — malformed CXF accepted at protocol level; 1 credential(s) skipped as invalid at import
+- **hardened**: rejected — CXF document violates producer requirements (GAP-20):
+  $.version.major: unsupported CXF major version (expected 1)
+  $.accounts[0].items[0].credentials[0].key: key is not PKCS#8 DER (CXF §3.3.12)
