@@ -1,0 +1,326 @@
+[
+  {
+    "id": "A-01",
+    "title": "Importer public-key substitution in an indirect Export Request file",
+    "gaps": [
+      "GAP-05",
+      "GAP-06"
+    ],
+    "threats": [
+      "T-ER-01"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "adversary decrypted 1 credential(s)"
+      },
+      "hardened": {
+        "expected": "fails",
+        "observed": "rejected",
+        "pass": true,
+        "evidence": "export was not approved by the credential owner (GAP-29)"
+      }
+    }
+  },
+  {
+    "id": "A-02",
+    "title": "Active MITM on a direct channel, relaying a substituted importer key",
+    "gaps": [
+      "GAP-05",
+      "GAP-19"
+    ],
+    "threats": [
+      "T-ER-02"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "MITM decrypted 1 credential(s) via plain HTTP"
+      },
+      "hardened": {
+        "expected": "fails",
+        "observed": "rejected",
+        "pass": true,
+        "evidence": "TLS material is required for the direct transport (GAP-19)"
+      }
+    }
+  },
+  {
+    "id": "A-03",
+    "title": "Replay of a captured ExportResponse to the importer",
+    "gaps": [
+      "GAP-01",
+      "GAP-11",
+      "GAP-31"
+    ],
+    "threats": [
+      "T-ER-03"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "replay imported 1 credential(s), replaced 1"
+      },
+      "hardened": {
+        "expected": "fails",
+        "observed": "rejected",
+        "pass": true,
+        "evidence": "no pending Export Request"
+      }
+    }
+  },
+  {
+    "id": "A-04",
+    "title": "HPKE suite / archive negotiation tampering",
+    "gaps": [
+      "GAP-02",
+      "GAP-03"
+    ],
+    "threats": [
+      "T-ER-04"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "forced non-MTI suite (KEM 16), imported 1 credential(s)"
+      },
+      "hardened": {
+        "expected": "fails",
+        "observed": "rejected",
+        "pass": true,
+        "evidence": "only the MTI suite was offered; nothing to downgrade"
+      }
+    }
+  },
+  {
+    "id": "A-05",
+    "title": "Protocol version downgrade",
+    "gaps": [
+      "GAP-04",
+      "GAP-24"
+    ],
+    "threats": [
+      "T-ER-05"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "version 0 accepted for request version 1, imported 1 credential(s)"
+      },
+      "hardened": {
+        "expected": "fails",
+        "observed": "rejected",
+        "pass": true,
+        "evidence": "response version 0 is below requested 1 (GAP-04)"
+      }
+    }
+  },
+  {
+    "id": "A-06",
+    "title": "Swapping or reordering files inside the archive",
+    "gaps": [
+      "GAP-07",
+      "GAP-09"
+    ],
+    "threats": [
+      "T-ER-06"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "swapped archive imported 2 credential(s)"
+      },
+      "hardened": {
+        "expected": "fails",
+        "observed": "rejected",
+        "pass": true,
+        "evidence": "CXP-Export/documents/ocTuME6YGDwaoeGc_VxAoQ.jwe does not match the manifest"
+      }
+    }
+  },
+  {
+    "id": "A-07",
+    "title": "Credential injection by an unauthenticated exporter",
+    "gaps": [
+      "GAP-14",
+      "GAP-30"
+    ],
+    "threats": [
+      "T-ER-07"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "injected 1 credential(s)"
+      },
+      "hardened": {
+        "expected": "fails",
+        "observed": "rejected",
+        "pass": true,
+        "evidence": "response hpke does not correspond to any request entry"
+      }
+    }
+  },
+  {
+    "id": "A-08",
+    "title": "Decompression bomb via deflate or largeBlob",
+    "gaps": [
+      "GAP-12"
+    ],
+    "threats": [
+      "T-ER-08"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "decompression bomb accepted: 2097152 bytes inflated"
+      },
+      "hardened": {
+        "expected": "fails",
+        "observed": "rejected",
+        "pass": true,
+        "evidence": "bomb.bin: declared size 2097152 exceeds 1048576"
+      }
+    }
+  },
+  {
+    "id": "A-09",
+    "title": "Post-import memory residue of PKCS#8 keys",
+    "gaps": [
+      "GAP-13"
+    ],
+    "threats": [
+      "T-ER-09"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "key material not zeroed after import"
+      },
+      "hardened": {
+        "expected": "reduced",
+        "observed": "reduced",
+        "pass": true,
+        "evidence": "DER buffers zeroed; base64url strings persist until GC"
+      }
+    }
+  },
+  {
+    "id": "A-10",
+    "title": "Clone use of source and migrated credential goes undetected by the RP",
+    "gaps": [
+      "GAP-15",
+      "GAP-17"
+    ],
+    "threats": [
+      "T-ER-10"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "both source and migrated credential sign in; RP cannot distinguish"
+      },
+      "hardened": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "both source and migrated credential sign in; RP cannot distinguish"
+      }
+    }
+  },
+  {
+    "id": "A-11",
+    "title": "PRF seed reuse across two importers",
+    "gaps": [
+      "GAP-16"
+    ],
+    "threats": [
+      "T-ER-11"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "identical PKCS#8 key material across exports; hmacCredentials would also be copied verbatim (CXF §3.3.12.3)"
+      },
+      "hardened": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "identical PKCS#8 key material across exports; hmacCredentials would also be copied verbatim (CXF §3.3.12.3)"
+      }
+    }
+  },
+  {
+    "id": "A-12",
+    "title": "Metadata observable to a passive observer of the Export Response",
+    "gaps": [
+      "GAP-08",
+      "GAP-18"
+    ],
+    "threats": [
+      "T-ER-12"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "file names expose Item IDs: CXP-Export/documents/crO22SMX_lyr8BqHaH-bUw.jwe, CXP-Export/documents/MO6T_UCL22AyfKy3qJsC9g.jwe"
+      },
+      "hardened": {
+        "expected": "reduced",
+        "observed": "reduced",
+        "pass": true,
+        "evidence": "file names randomized; 2 file sizes still observable"
+      }
+    }
+  },
+  {
+    "id": "A-13",
+    "title": "Consent phishing: victim approves an attacker-crafted Export Request",
+    "gaps": [
+      "GAP-05",
+      "GAP-06",
+      "GAP-29"
+    ],
+    "threats": [
+      "T-ER-13"
+    ],
+    "results": {
+      "spec-minimal": {
+        "expected": "succeeds",
+        "observed": "succeeded",
+        "pass": true,
+        "evidence": "adversary's request served without consent, 1 credential(s)"
+      },
+      "hardened": {
+        "expected": "fails",
+        "observed": "rejected",
+        "pass": true,
+        "evidence": "export was not approved by the credential owner (GAP-29)"
+      }
+    }
+  }
+]
