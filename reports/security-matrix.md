@@ -1,6 +1,6 @@
 # Security Evaluation Matrix
 
-**Commit:** `28d8c27` | **Date:** 2026-10-03 | **Runs:** 3 | **Flaky:** 0
+**Commit:** `bfaa788` | **Date:** 2026-10-03 | **Runs:** 3 | **Flaky:** 0
 
 ## Classification Key
 

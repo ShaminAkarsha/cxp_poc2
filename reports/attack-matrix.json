@@ -148,7 +148,7 @@
         "expected": "fails",
         "observed": "rejected",
         "pass": true,
-        "evidence": "CXP-Export/documents/dmmmJATOIoPnBz1KLYUVUQ.jwe does not match the manifest"
+        "evidence": "CXP-Export/documents/5xEqPWlIleiHj4Hm5tqkWQ.jwe does not match the manifest"
       }
     }
   },
@@ -294,7 +294,7 @@
         "expected": "succeeds",
         "observed": "succeeded",
         "pass": true,
-        "evidence": "file names expose Item IDs: CXP-Export/documents/E2t6ckZcoYEfCjfEvtqTWw.jwe, CXP-Export/documents/bQZpWy6vtItoZAMTNjRLIg.jwe"
+        "evidence": "file names expose Item IDs: CXP-Export/documents/ehGorEsDUVRsjYf_DoUV9A.jwe, CXP-Export/documents/5vJVauXBjUg8c2R5r_illA.jwe"
       },
       "hardened": {
         "expected": "reduced",

@@ -1,6 +1,6 @@
 # Attack Matrix
 
-Generated: 2026-10-03T18:19:22.634Z
+Generated: 2026-10-03T18:30:01.425Z
 
 | ID | Scenario | Gaps | spec-minimal | hardened |
 |---|---|---|---|---|
@@ -53,7 +53,7 @@ Generated: 2026-10-03T18:19:22.634Z
 ### A-06: Swapping or reordering files inside the archive
 
 - **spec-minimal**: succeeded — swapped archive imported 2 credential(s)
-- **hardened**: rejected — CXP-Export/documents/dmmmJATOIoPnBz1KLYUVUQ.jwe does not match the manifest
+- **hardened**: rejected — CXP-Export/documents/5xEqPWlIleiHj4Hm5tqkWQ.jwe does not match the manifest
 
 ### A-07: Credential injection by an unauthenticated exporter
 
@@ -82,7 +82,7 @@ Generated: 2026-10-03T18:19:22.634Z
 
 ### A-12: Metadata observable to a passive observer of the Export Response
 
-- **spec-minimal**: succeeded — file names expose Item IDs: CXP-Export/documents/E2t6ckZcoYEfCjfEvtqTWw.jwe, CXP-Export/documents/bQZpWy6vtItoZAMTNjRLIg.jwe
+- **spec-minimal**: succeeded — file names expose Item IDs: CXP-Export/documents/ehGorEsDUVRsjYf_DoUV9A.jwe, CXP-Export/documents/5vJVauXBjUg8c2R5r_illA.jwe
 - **hardened**: reduced — file names randomized; 2 file sizes still observable
 
 ### A-13: Consent phishing: victim approves an attacker-crafted Export Request
