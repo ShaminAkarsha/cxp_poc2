@@ -18,7 +18,7 @@ export const a04: Scenario = {
       try {
         const { response } = await world.providerA.exporter.respond(tampered, "file");
         const report = await world.providerB.importer.importResponse(response);
-        return { id: "A-04", profile: policy.profile, outcome: "succeeded", evidence: `forced non-MTI suite (KEM ${response.hpke.kem}), imported ${report.imported.length} credential(s)` };
+        return { id: "A-04", profile: policy.profile, outcome: "succeeded", evidence: `adversary controlled suite selection (KEM ${response.hpke.kem}); negotiation integrity absent, imported ${report.imported.length} credential(s)` };
       } catch (err) {
         return { id: "A-04", profile: policy.profile, outcome: "rejected", evidence: `${err instanceof Error ? err.message : String(err)}` };
       }

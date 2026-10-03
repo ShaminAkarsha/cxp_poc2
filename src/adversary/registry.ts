@@ -16,9 +16,14 @@ import { a10 } from "./scenarios/a10.js";
 import { a11 } from "./scenarios/a11.js";
 import { a12 } from "./scenarios/a12.js";
 import { a13 } from "./scenarios/a13.js";
+import { a14 } from "./scenarios/a14.js";
+import { a18 } from "./scenarios/a18.js";
+import { a20 } from "./scenarios/a20.js";
+import { a21 } from "./scenarios/a21.js";
+import { a22 } from "./scenarios/a22.js";
 import type { Scenario, ScenarioDefinition } from "./types.js";
 
-export const SCENARIOS: readonly Scenario[] = [a01, a02, a03, a04, a05, a06, a07, a08, a09, a10, a11, a12, a13];
+export const SCENARIOS: readonly Scenario[] = [a01, a02, a03, a04, a05, a06, a07, a08, a09, a10, a11, a12, a13, a14, a18, a20, a21, a22];
 
 export function catalogEntry(id: string): ScenarioDefinition {
   const entry = SCENARIO_CATALOG.find((s) => s.id === id);
