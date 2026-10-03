@@ -17,7 +17,9 @@
     "rp": "tsx src/rp/main.ts",
     "demo:exchange": "tsx src/cli/demo-exchange.ts",
     "demo:migrate": "tsx src/cli/demo-migrate.ts",
-    "demo:e2e": "tsx src/cli/demo-e2e.ts"
+    "demo:e2e": "tsx src/cli/demo-e2e.ts",
+    "walkthrough": "tsx src/cli/walkthrough.ts",
+    "dashboard": "tsx src/dashboard/main.ts"
   },
   "dependencies": {
     "@hpke/core": "^1.9.0",
