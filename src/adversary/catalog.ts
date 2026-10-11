@@ -21,8 +21,8 @@ export const SCENARIO_CATALOG: readonly ScenarioDefinition[] = [
   { id: "A-12", title: "Metadata observable to a passive observer of the Export Response", gaps: ["GAP-08", "GAP-18"], threats: ["T-RS-05a", "T-ER-06a"], expected: { "spec-minimal": "succeeds", hardened: "reduced" }, hardenedMitigationReady: true },
   { id: "A-13", title: "Consent phishing: victim approves an attacker-crafted Export Request", gaps: ["GAP-05", "GAP-06", "GAP-29"], threats: ["T-EX-01b", "T-EX-02a", "T-ER-02a"], expected: std, hardenedMitigationReady: true },
   { id: "A-14", title: "Scope tampering: remove credentialTypes from the request", gaps: ["GAP-32"], threats: ["T-ER-03c"], expected: std, hardenedMitigationReady: true },
-  { id: "A-18", title: "Silent exclusion of a passkey with a non-zero signature counter", gaps: ["GAP-36"], threats: ["T-EX-04"], expected: { "spec-minimal": "succeeds", hardened: "succeeds" }, hardenedMitigationReady: true },
-  { id: "A-20", title: "Stale CXF document accepted without freshness check", gaps: ["GAP-21"], threats: ["T-IM-02b"], expected: std, hardenedMitigationReady: true },
-  { id: "A-21", title: "Exporter identity mismatch between CXP envelope and CXF header", gaps: ["GAP-22"], threats: ["T-RS-04"], expected: std, hardenedMitigationReady: true },
-  { id: "A-22", title: "Malformed CXF document violating producer MUSTs", gaps: ["GAP-20"], threats: ["T-IM-02a"], expected: std, hardenedMitigationReady: true },
+  { id: "A-15", title: "Silent exclusion of a passkey with a non-zero signature counter", gaps: ["GAP-33"], threats: ["T-EX-04"], expected: { "spec-minimal": "succeeds", hardened: "succeeds" }, hardenedMitigationReady: true },
+  { id: "A-16", title: "Stale CXF document accepted without freshness check", gaps: ["GAP-21"], threats: ["T-IM-02b"], expected: std, hardenedMitigationReady: true },
+  { id: "A-17", title: "Exporter identity mismatch between CXP envelope and CXF header", gaps: ["GAP-22"], threats: ["T-RS-04"], expected: std, hardenedMitigationReady: true },
+  { id: "A-18", title: "Malformed CXF document violating producer MUSTs", gaps: ["GAP-20"], threats: ["T-IM-02a"], expected: std, hardenedMitigationReady: true },
 ];

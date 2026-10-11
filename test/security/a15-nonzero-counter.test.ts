@@ -1,9 +1,9 @@
 /**
- * A-18 / T-EX-04: silent exclusion of a passkey with a non-zero counter.
+ * A-15 / T-EX-04: silent exclusion of a passkey with a non-zero counter.
  *
  * CXF §3.3.12 mandates that passkeys with signCount != 0 are excluded from
- * export. The user is not warned (GAP-36: exporter does not notify the owner
- * of excluded credentials). GAP-36 is not implemented; hardened classified
+ * export. The user is not warned (GAP-33: exporter does not notify the owner
+ * of excluded credentials). GAP-33 is not implemented; hardened classified
  * as NOT MITIGATED.
  *
  * Both profiles: succeeds — exclusion is spec-mandated; silence is not.
@@ -13,7 +13,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { getPolicy, PROFILE_NAMES } from "../../src/policy/index.js";
 import { createWorld } from "../../src/scenario/world.js";
 
-describe("A-18 / GAP-36: silent exclusion of passkey with non-zero signature counter", () => {
+describe("A-15 / GAP-33: silent exclusion of passkey with non-zero signature counter", () => {
   describe.each(PROFILE_NAMES)("%s", (profile) => {
     const policy = getPolicy(profile);
     let world: Awaited<ReturnType<typeof createWorld>>;

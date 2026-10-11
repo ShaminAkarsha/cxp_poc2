@@ -1,5 +1,7 @@
 # Security Evaluation Matrix
 
+> **Renumbered 2026-10-11 (IDs only; results unchanged):** A-18 → A-15, A-20 → A-16, A-21 → A-17, A-22 → A-18, and GAP-36 → GAP-33, so that scenario and gap IDs are contiguous. `reports/security-raw.log` is the unmodified raw output of this run and still uses the old IDs.
+
 **Commit:** `bfaa788` | **Date:** 2026-10-03 | **Runs:** 3 | **Flaky:** 0
 
 ## Classification Key
@@ -174,20 +176,20 @@
 
 ---
 
-### A-18: Silent exclusion of a passkey with a non-zero signature counter
+### A-15: Silent exclusion of a passkey with a non-zero signature counter
 
 | Profile | Expected | Observed | Classification | Evidence |
 |---|---|---|---|---|
-| spec-minimal | succeeds | succeeded | CONFIRMED | 1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-36 not implemented) |
-| hardened | succeeds | succeeded | NOT MITIGATED | 1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-36 not implemented) |
+| spec-minimal | succeeds | succeeded | CONFIRMED | 1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-33 not implemented) |
+| hardened | succeeds | succeeded | NOT MITIGATED | 1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-33 not implemented) |
 
-**GAPs:** GAP-36 | **Threats:** T-EX-04 | **Flags:** none (GAP-36 not implemented)
+**GAPs:** GAP-33 | **Threats:** T-EX-04 | **Flags:** none (GAP-33 not implemented)
 
-**Finding:** The CXF §3.3.12 exclusion of passkeys with signCount != 0 is spec-mandated. However, the silence — the exporter does not notify the credential owner which passkeys were excluded and why — is a specification gap (GAP-36). The hardened profile does not implement GAP-36 (reporting each excluded credential to the owner with the reason, before and after export), so this scenario is classified as NOT MITIGATED.
+**Finding:** The CXF §3.3.12 exclusion of passkeys with signCount != 0 is spec-mandated. However, the silence — the exporter does not notify the credential owner which passkeys were excluded and why — is a specification gap (GAP-33). The hardened profile does not implement GAP-33 (reporting each excluded credential to the owner with the reason, before and after export), so this scenario is classified as NOT MITIGATED.
 
 ---
 
-### A-20: Stale CXF document accepted without freshness check
+### A-16: Stale CXF document accepted without freshness check
 
 | Profile | Expected | Observed | Classification | Evidence |
 |---|---|---|---|---|
@@ -198,7 +200,7 @@
 
 ---
 
-### A-21: Exporter identity mismatch between CXP envelope and CXF header
+### A-17: Exporter identity mismatch between CXP envelope and CXF header
 
 | Profile | Expected | Observed | Classification | Evidence |
 |---|---|---|---|---|
@@ -209,7 +211,7 @@
 
 ---
 
-### A-22: Malformed CXF document violating producer MUSTs
+### A-18: Malformed CXF document violating producer MUSTs
 
 | Profile | Expected | Observed | Classification | Evidence |
 |---|---|---|---|---|

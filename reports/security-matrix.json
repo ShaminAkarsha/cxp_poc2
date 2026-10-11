@@ -364,33 +364,33 @@
     "runs": 3
   },
   {
-    "scenarioId": "A-18",
+    "scenarioId": "A-15",
     "scenarioName": "Silent exclusion of a passkey with a non-zero signature counter",
-    "gaps": ["GAP-36"],
+    "gaps": ["GAP-33"],
     "threats": ["T-EX-04"],
     "profile": "spec-minimal",
     "expected": "succeeds",
     "observed": "succeeded",
     "classification": "CONFIRMED",
-    "evidence": "1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-36 not implemented)",
+    "evidence": "1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-33 not implemented)",
     "runsConsistent": true,
     "runs": 3
   },
   {
-    "scenarioId": "A-18",
+    "scenarioId": "A-15",
     "scenarioName": "Silent exclusion of a passkey with a non-zero signature counter",
-    "gaps": ["GAP-36"],
+    "gaps": ["GAP-33"],
     "threats": ["T-EX-04"],
     "profile": "hardened",
     "expected": "succeeds",
     "observed": "succeeded",
     "classification": "NOT MITIGATED",
-    "evidence": "1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-36 not implemented)",
+    "evidence": "1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-33 not implemented)",
     "runsConsistent": true,
     "runs": 3
   },
   {
-    "scenarioId": "A-20",
+    "scenarioId": "A-16",
     "scenarioName": "Stale CXF document accepted without freshness check",
     "gaps": ["GAP-21"],
     "threats": ["T-IM-02b"],
@@ -403,7 +403,7 @@
     "runs": 3
   },
   {
-    "scenarioId": "A-20",
+    "scenarioId": "A-16",
     "scenarioName": "Stale CXF document accepted without freshness check",
     "gaps": ["GAP-21"],
     "threats": ["T-IM-02b"],
@@ -416,7 +416,7 @@
     "runs": 3
   },
   {
-    "scenarioId": "A-21",
+    "scenarioId": "A-17",
     "scenarioName": "Exporter identity mismatch between CXP envelope and CXF header",
     "gaps": ["GAP-22"],
     "threats": ["T-RS-04"],
@@ -429,7 +429,7 @@
     "runs": 3
   },
   {
-    "scenarioId": "A-21",
+    "scenarioId": "A-17",
     "scenarioName": "Exporter identity mismatch between CXP envelope and CXF header",
     "gaps": ["GAP-22"],
     "threats": ["T-RS-04"],
@@ -442,7 +442,7 @@
     "runs": 3
   },
   {
-    "scenarioId": "A-22",
+    "scenarioId": "A-18",
     "scenarioName": "Malformed CXF document violating producer MUSTs",
     "gaps": ["GAP-20"],
     "threats": ["T-IM-02a"],
@@ -455,7 +455,7 @@
     "runs": 3
   },
   {
-    "scenarioId": "A-22",
+    "scenarioId": "A-18",
     "scenarioName": "Malformed CXF document violating producer MUSTs",
     "gaps": ["GAP-20"],
     "threats": ["T-IM-02a"],

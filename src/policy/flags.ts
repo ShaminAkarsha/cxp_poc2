@@ -123,5 +123,5 @@ export const GAPS_WITHOUT_FLAG: Readonly<Record<GapId, string>> = {
   "GAP-27": "Both profiles apply DEFLATE to zip entries; inflation limits are GAP-12",
   "GAP-28": "Both profiles define correspondence as equal mode/kem/kdf/aead",
   "GAP-32": "Mitigated via GAP-01, GAP-05, GAP-06 (no dedicated flag)",
-  "GAP-36": "Not implemented; would require ExportingProvider changes outside the adversary boundary",
+  "GAP-33": "Not implemented; would require ExportingProvider changes outside the adversary boundary",
 };

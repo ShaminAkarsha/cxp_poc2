@@ -1,5 +1,5 @@
 /**
- * A-20 / T-RS-01a: stale CXF document accepted without freshness check.
+ * A-16 / T-RS-01a: stale CXF document accepted without freshness check.
  *
  * The exporter produces a CXF document with a timestamp 2 hours in the past.
  * GAP-21 (enforceTimestampFreshness) should reject it under hardened.
@@ -15,7 +15,7 @@ import { ImportingProvider } from "../../src/provider/importer.js";
 import { Vault } from "../../src/provider/vault.js";
 import { createWorld } from "../../src/scenario/world.js";
 
-describe("A-20 / GAP-21: stale CXF document accepted without freshness check", () => {
+describe("A-16 / GAP-21: stale CXF document accepted without freshness check", () => {
   describe.each(PROFILE_NAMES)("%s", (profile) => {
     const policy = getPolicy(profile);
     let world: Awaited<ReturnType<typeof createWorld>>;

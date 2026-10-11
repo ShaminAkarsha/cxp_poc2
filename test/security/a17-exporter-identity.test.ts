@@ -1,25 +1,23 @@
 /**
- * A-22 / T-IM-02c: malformed CXF document violating producer MUSTs.
+ * A-17 / T-RS-02: exporter identity mismatch between CXP envelope and CXF header.
  *
- * The exporter produces a CXF document with invalid DER key material and
- * an unsupported major version. Under spec-minimal the document is accepted
- * at the protocol level. Under hardened, strictCxfValidation (GAP-20)
- * rejects producer-MUST violations.
+ * The CXP response carries `exporter: "adversary.example"` while the
+ * encrypted CXF document says `exporterRpId: "provider-a.example"`.
+ * GAP-22 (bindExporterIdentity) should reject the mismatch under hardened.
  *
- * Gaps exercised: GAP-20.
- * spec-minimal: succeeds — no strict validation.
- * hardened: fails — strict validation catches version and key violations.
+ * Gaps exercised: GAP-22.
+ * spec-minimal: succeeds — no identity binding check.
+ * hardened: fails — CXF exporterRpId differs from response exporter (GAP-22).
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { generateKeyPair, MTI_SUITE } from "../../src/crypto/hpke.js";
 import { createExportResponse } from "../../src/cxp/response.js";
-import { encodeB64url, type Header } from "../../src/cxf/index.js";
 import { getPolicy, isEnabled, PROFILE_NAMES } from "../../src/policy/index.js";
 import { ImportingProvider } from "../../src/provider/importer.js";
 import { Vault } from "../../src/provider/vault.js";
 import { createWorld } from "../../src/scenario/world.js";
 
-describe("A-22 / GAP-20: malformed CXF document violating producer MUSTs", () => {
+describe("A-17 / GAP-22: exporter identity mismatch (CXP vs CXF)", () => {
   describe.each(PROFILE_NAMES)("%s", (profile) => {
     const policy = getPolicy(profile);
     let world: Awaited<ReturnType<typeof createWorld>>;
@@ -34,7 +32,7 @@ describe("A-22 / GAP-20: malformed CXF document violating producer MUSTs", () =>
     });
 
     if (profile === "spec-minimal") {
-      it("succeeds: malformed CXF accepted at protocol level", async () => {
+      it("succeeds: identity mismatch accepted without binding check", async () => {
         const testImporter = new ImportingProvider({
           rpId: world.providerB.importer.config.rpId,
           vault: new Vault(),
@@ -43,31 +41,18 @@ describe("A-22 / GAP-20: malformed CXF document violating producer MUSTs", () =>
         });
         const request = await testImporter.createRequest("indirect");
         const { header } = world.providerA.exporter.buildCxf(request);
-        const malformed: Header = {
-          ...header,
-          accounts: header.accounts.map((a) => ({
-            ...a,
-            items: a.items.map((item) => ({
-              ...item,
-              credentials: item.credentials.map((c) => ({
-                ...c,
-                key: encodeB64url(new Uint8Array([0xde, 0xad, 0xbe, 0xef])),
-              })),
-            })),
-          })),
-        };
-        const rpId = world.providerA.exporter.config.rpId;
         const response = await createExportResponse({
           request,
-          header: malformed,
-          exporter: rpId,
+          header,
+          exporter: "adversary.example",
           policy,
         });
         const report = await testImporter.importResponse(response);
-        expect(report.skipped.length).toBeGreaterThan(0);
+        expect(report.imported).toHaveLength(1);
+        expect(report.exporter).toBe("provider-a.example");
       });
     } else {
-      it("fails: strict validation rejects malformed CXF (GAP-20)", async () => {
+      it("fails: exporter identity mismatch rejected (GAP-22)", async () => {
         const testImporter = new ImportingProvider({
           rpId: world.providerB.importer.config.rpId,
           vault: new Vault(),
@@ -76,33 +61,19 @@ describe("A-22 / GAP-20: malformed CXF document violating producer MUSTs", () =>
         });
         const request = await testImporter.createRequest("indirect");
         const { header } = world.providerA.exporter.buildCxf(request);
-        const malformed: Header = {
-          ...header,
-          accounts: header.accounts.map((a) => ({
-            ...a,
-            items: a.items.map((item) => ({
-              ...item,
-              credentials: item.credentials.map((c) => ({
-                ...c,
-                key: encodeB64url(new Uint8Array([0xde, 0xad, 0xbe, 0xef])),
-              })),
-            })),
-          })),
-        };
-        const rpId = world.providerA.exporter.config.rpId;
         const senderKey = isEnabled(policy, "requireHpkeAuthMode")
           ? await generateKeyPair(MTI_SUITE.kem)
           : undefined;
         const response = await createExportResponse({
           request,
-          header: malformed,
-          exporter: rpId,
+          header,
+          exporter: "adversary.example",
           policy,
           ...(senderKey ? { senderKey } : {}),
         });
         await expect(
           testImporter.importResponse(response),
-        ).rejects.toThrow(/GAP-20|producer requirements/);
+        ).rejects.toThrow(/exporterRpId.*differs.*GAP-22/);
       });
     }
   });

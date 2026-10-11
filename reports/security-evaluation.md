@@ -1,5 +1,7 @@
 # CXP/CXF Security Evaluation Report
 
+> **Renumbered 2026-10-11 (IDs only; results unchanged):** A-18 → A-15, A-20 → A-16, A-21 → A-17, A-22 → A-18, and GAP-36 → GAP-33, so that scenario and gap IDs are contiguous. `reports/security-raw.log` is the unmodified raw output of this run and still uses the old IDs.
+
 ## 1. Run Metadata
 
 | Field | Value |
@@ -33,7 +35,7 @@
 | FLAKY | 0 | 0 | 0 |
 | **Total** | **18** | **18** | **36** |
 
-Every spec-minimal run confirms the attack succeeds (CONFIRMED). Under the hardened profile, 13 of 18 attacks are blocked (MITIGATED), 2 are reduced but not eliminated (PARTIALLY MITIGATED), 2 succeed by design because the specification mandates the vulnerable behavior (SPEC-MANDATED), and 1 is NOT MITIGATED because the required control (GAP-36) is not implemented. No unexpected outcomes or flaky results were observed.
+Every spec-minimal run confirms the attack succeeds (CONFIRMED). Under the hardened profile, 13 of 18 attacks are blocked (MITIGATED), 2 are reduced but not eliminated (PARTIALLY MITIGATED), 2 succeed by design because the specification mandates the vulnerable behavior (SPEC-MANDATED), and 1 is NOT MITIGATED because the required control (GAP-33) is not implemented. No unexpected outcomes or flaky results were observed.
 
 ## 3. Per-Scenario Analysis
 
@@ -213,21 +215,21 @@ Every spec-minimal run confirms the attack succeeds (CONFIRMED). Under the harde
 
 ---
 
-### A-18 — Silent exclusion of a passkey with a non-zero signature counter
+### A-15 — Silent exclusion of a passkey with a non-zero signature counter
 
-**Threats:** T-EX-04 | **Gap:** GAP-36
+**Threats:** T-EX-04 | **Gap:** GAP-33
 
 **spec-minimal (CONFIRMED):** A passkey with `signCount = 42` is silently excluded from the CXF export document. The credential owner is not notified that a credential was dropped.
 
-**hardened (NOT MITIGATED):** The same behavior occurs. The exclusion itself is spec-mandated (CXF §3.3.12), but the silence — the exporter not notifying the credential owner which passkeys were excluded and why — is not. GAP-36 would require the exporter to report every excluded credential to the owner (with the reason) before and after export. This control is not implemented in the PoC hardened profile because it would require changes to `ExportingProvider` outside the adversary code boundary. Classified as NOT MITIGATED.
+**hardened (NOT MITIGATED):** The same behavior occurs. The exclusion itself is spec-mandated (CXF §3.3.12), but the silence — the exporter not notifying the credential owner which passkeys were excluded and why — is not. GAP-33 would require the exporter to report every excluded credential to the owner (with the reason) before and after export. This control is not implemented in the PoC hardened profile because it would require changes to `ExportingProvider` outside the adversary code boundary. Classified as NOT MITIGATED.
 
 **Note:** This is a data-loss risk: credentials that have been used for authentication become silently unexportable. The user may not realize that not all of their passkeys were migrated.
 
-**Flags exercised:** None (GAP-36 not implemented).
+**Flags exercised:** None (GAP-33 not implemented).
 
 ---
 
-### A-20 — Stale CXF document accepted without freshness check
+### A-16 — Stale CXF document accepted without freshness check
 
 **Threats:** T-IM-02b
 
@@ -239,7 +241,7 @@ Every spec-minimal run confirms the attack succeeds (CONFIRMED). Under the harde
 
 ---
 
-### A-21 — Exporter identity mismatch between CXP envelope and CXF header
+### A-17 — Exporter identity mismatch between CXP envelope and CXF header
 
 **Threats:** T-RS-04
 
@@ -251,7 +253,7 @@ Every spec-minimal run confirms the attack succeeds (CONFIRMED). Under the harde
 
 ---
 
-### A-22 — Malformed CXF document violating producer MUSTs
+### A-18 — Malformed CXF document violating producer MUSTs
 
 **Threats:** T-IM-02a
 
@@ -330,14 +332,14 @@ The table below maps each hardened policy flag to the GAP it implements and the 
 | `zeroizeKeyMaterial` | GAP-13 | A-09 |
 | `requireHpkeAuthMode` | GAP-14 | A-07, A-07b |
 | `requireTls` | GAP-19 | A-02, A-02 TLS variant |
-| `strictCxfValidation` | GAP-20 | A-22 |
-| `enforceTimestampFreshness` | GAP-21 | A-20 |
-| `bindExporterIdentity` | GAP-22 | A-21 |
+| `strictCxfValidation` | GAP-20 | A-18 |
+| `enforceTimestampFreshness` | GAP-21 | A-16 |
+| `bindExporterIdentity` | GAP-22 | A-17 |
 | `requireExportConsent` | GAP-29 | A-13, ablation |
 | `rejectConflictingImport` | GAP-30 | A-07, A-07c |
 | `secureExportFiles` | GAP-31 | A-03 |
 
-**Coverage:** All 21 policy flags are now directly exercised by at least one scenario. The 3 previously unexercised flags — `strictCxfValidation` (GAP-20), `enforceTimestampFreshness` (GAP-21), and `bindExporterIdentity` (GAP-22) — are now covered by A-22, A-20, and A-21 respectively.
+**Coverage:** All 21 policy flags are now directly exercised by at least one scenario. The 3 previously unexercised flags — `strictCxfValidation` (GAP-20), `enforceTimestampFreshness` (GAP-21), and `bindExporterIdentity` (GAP-22) — are now covered by A-18, A-16, and A-17 respectively.
 
 ## 7. Unexercised GAP Entries
 
@@ -356,19 +358,19 @@ GAP entries that have no associated policy flag and are not directly exercised b
 | GAP-27 | `deflate` has no defined target in CXP | Specification editorial issue; no security test applicable |
 | GAP-28 | "corresponds" is undefined in CXP | Specification ambiguity; no security test applicable |
 | GAP-32 | Scope tampering via credentialTypes removal | Exercised by A-14; mitigated via GAP-01, GAP-05, GAP-06 (no dedicated flag) |
-| GAP-36 | Exporter does not notify owner of excluded credentials | Exercised by A-18; NOT MITIGATED (control not implemented) |
+| GAP-33 | Exporter does not notify owner of excluded credentials | Exercised by A-15; NOT MITIGATED (control not implemented) |
 
 ## 8. Conclusions
 
 1. **All 18 attack scenarios are reproducible.** Under the spec-minimal profile (most permissive conformant implementation), every scenario succeeds, confirming the identified specification gaps.
 
-2. **The hardened profile mitigates 13 of 18 attacks.** The 21 policy flags collectively close the protocol-level gaps. Two residual risks remain where mitigation is partial (PARTIALLY MITIGATED): memory residue (A-09) and metadata leakage (A-12). One attack (A-18) is NOT MITIGATED because GAP-36 (owner notification of excluded credentials) is not implemented.
+2. **The hardened profile mitigates 13 of 18 attacks.** The 21 policy flags collectively close the protocol-level gaps. Two residual risks remain where mitigation is partial (PARTIALLY MITIGATED): memory residue (A-09) and metadata leakage (A-12). One attack (A-15) is NOT MITIGATED because GAP-33 (owner notification of excluded credentials) is not implemented.
 
 3. **Two gaps are spec-mandated.** Clone credential use (A-10) and PRF seed reuse (A-11) succeed under both profiles because the CXF specification mandates the vulnerable behavior. These require specification-level changes.
 
-4. **One gap is not mitigated.** Silent counter exclusion (A-18) succeeds under both profiles. The exclusion is spec-mandated, but the silence (GAP-36: exporter does not notify the owner) is a specification gap that the hardened profile does not address. Implementing GAP-36 would require changes to `ExportingProvider` to report every excluded credential to the owner with the reason, before and after export.
+4. **One gap is not mitigated.** Silent counter exclusion (A-15) succeeds under both profiles. The exclusion is spec-mandated, but the silence (GAP-33: exporter does not notify the owner) is a specification gap that the hardened profile does not address. Implementing GAP-33 would require changes to `ExportingProvider` to report every excluded credential to the owner with the reason, before and after export.
 
-5. **All 21 policy flags are now exercised.** The addition of A-20 (GAP-21), A-21 (GAP-22), and A-22 (GAP-20) closes the previous gap in flag coverage.
+5. **All 21 policy flags are now exercised.** The addition of A-16 (GAP-21), A-17 (GAP-22), and A-18 (GAP-20) closes the previous gap in flag coverage.
 
 6. **Ablation testing confirms the mitigating controls.** Consent alone (GAP-29) does not prevent key-substitution or consent-phishing attacks; the fingerprint verification flags (`requireSasConfirmation`, `confirmRequestFileKey`) are the actual mitigating controls. TLS (GAP-19) secures the transport but does not substitute for application-layer key confirmation.
 

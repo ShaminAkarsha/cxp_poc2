@@ -6,8 +6,8 @@ import { createWorld } from "../../scenario/world.js";
 import { catalogEntry } from "../registry.js";
 import type { Scenario, ScenarioResult } from "../types.js";
 
-export const a20: Scenario = {
-  ...catalogEntry("A-20"),
+export const a16: Scenario = {
+  ...catalogEntry("A-16"),
   async run(policy: Policy): Promise<ScenarioResult> {
     const world = await createWorld(policy);
     try {
@@ -32,9 +32,9 @@ export const a20: Scenario = {
       try {
         const { response } = await staleExporter.respond(request, "file");
         await testImporter.importResponse(response);
-        return { id: "A-20", profile: policy.profile, outcome: "succeeded", evidence: "stale CXF document (timestamp 2h old) accepted without freshness check" };
+        return { id: "A-16", profile: policy.profile, outcome: "succeeded", evidence: "stale CXF document (timestamp 2h old) accepted without freshness check" };
       } catch (err) {
-        return { id: "A-20", profile: policy.profile, outcome: "rejected", evidence: `${err instanceof Error ? err.message : String(err)}` };
+        return { id: "A-16", profile: policy.profile, outcome: "rejected", evidence: `${err instanceof Error ? err.message : String(err)}` };
       }
     } finally {
       await world.close();

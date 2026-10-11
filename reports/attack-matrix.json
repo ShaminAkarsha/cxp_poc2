@@ -148,7 +148,7 @@
         "expected": "fails",
         "observed": "rejected",
         "pass": true,
-        "evidence": "CXP-Export/documents/5xEqPWlIleiHj4Hm5tqkWQ.jwe does not match the manifest"
+        "evidence": "CXP-Export/documents/SQGX6j01LlGknLUUi3aJFA.jwe does not match the manifest"
       }
     }
   },
@@ -294,7 +294,7 @@
         "expected": "succeeds",
         "observed": "succeeded",
         "pass": true,
-        "evidence": "file names expose Item IDs: CXP-Export/documents/ehGorEsDUVRsjYf_DoUV9A.jwe, CXP-Export/documents/5vJVauXBjUg8c2R5r_illA.jwe"
+        "evidence": "file names expose Item IDs: CXP-Export/documents/fDXXk8IO6w3c1NoxTVk3qA.jwe, CXP-Export/documents/uMErsC1lJlR2Dh8QxR_Keg.jwe"
       },
       "hardened": {
         "expected": "reduced",
@@ -357,10 +357,10 @@
     }
   },
   {
-    "id": "A-18",
+    "id": "A-15",
     "title": "Silent exclusion of a passkey with a non-zero signature counter",
     "gaps": [
-      "GAP-36"
+      "GAP-33"
     ],
     "threats": [
       "T-EX-04"
@@ -370,18 +370,18 @@
         "expected": "succeeds",
         "observed": "succeeded",
         "pass": true,
-        "evidence": "1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-36 not implemented)"
+        "evidence": "1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-33 not implemented)"
       },
       "hardened": {
         "expected": "succeeds",
         "observed": "succeeded",
         "pass": true,
-        "evidence": "1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-36 not implemented)"
+        "evidence": "1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-33 not implemented)"
       }
     }
   },
   {
-    "id": "A-20",
+    "id": "A-16",
     "title": "Stale CXF document accepted without freshness check",
     "gaps": [
       "GAP-21"
@@ -405,7 +405,7 @@
     }
   },
   {
-    "id": "A-21",
+    "id": "A-17",
     "title": "Exporter identity mismatch between CXP envelope and CXF header",
     "gaps": [
       "GAP-22"
@@ -429,7 +429,7 @@
     }
   },
   {
-    "id": "A-22",
+    "id": "A-18",
     "title": "Malformed CXF document violating producer MUSTs",
     "gaps": [
       "GAP-20"

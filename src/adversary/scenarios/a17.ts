@@ -7,8 +7,8 @@ import { createWorld } from "../../scenario/world.js";
 import { catalogEntry } from "../registry.js";
 import type { Scenario, ScenarioResult } from "../types.js";
 
-export const a21: Scenario = {
-  ...catalogEntry("A-21"),
+export const a17: Scenario = {
+  ...catalogEntry("A-17"),
   async run(policy: Policy): Promise<ScenarioResult> {
     const world = await createWorld(policy);
     try {
@@ -31,9 +31,9 @@ export const a21: Scenario = {
       });
       try {
         await testImporter.importResponse(response);
-        return { id: "A-21", profile: policy.profile, outcome: "succeeded", evidence: `CXP exporter="adversary.example" vs CXF exporterRpId="${header.exporterRpId}"; mismatch accepted` };
+        return { id: "A-17", profile: policy.profile, outcome: "succeeded", evidence: `CXP exporter="adversary.example" vs CXF exporterRpId="${header.exporterRpId}"; mismatch accepted` };
       } catch (err) {
-        return { id: "A-21", profile: policy.profile, outcome: "rejected", evidence: `${err instanceof Error ? err.message : String(err)}` };
+        return { id: "A-17", profile: policy.profile, outcome: "rejected", evidence: `${err instanceof Error ? err.message : String(err)}` };
       }
     } finally {
       await world.close();

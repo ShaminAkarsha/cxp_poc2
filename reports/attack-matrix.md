@@ -1,6 +1,6 @@
 # Attack Matrix
 
-Generated: 2026-10-03T18:30:01.425Z
+Generated: 2026-10-11T06:06:45.768Z
 
 | ID | Scenario | Gaps | spec-minimal | hardened |
 |---|---|---|---|---|
@@ -18,10 +18,10 @@ Generated: 2026-10-03T18:30:01.425Z
 | A-12 | Metadata observable to a passive observer of the Export Response | GAP-08, GAP-18 | ✓ succeeded | ✓ reduced |
 | A-13 | Consent phishing: victim approves an attacker-crafted Export Request | GAP-05, GAP-06, GAP-29 | ✓ succeeded | ✓ rejected |
 | A-14 | Scope tampering: remove credentialTypes from the request | GAP-32 | ✓ succeeded | ✓ rejected |
-| A-18 | Silent exclusion of a passkey with a non-zero signature counter | GAP-36 | ✓ succeeded | ✓ succeeded |
-| A-20 | Stale CXF document accepted without freshness check | GAP-21 | ✓ succeeded | ✓ rejected |
-| A-21 | Exporter identity mismatch between CXP envelope and CXF header | GAP-22 | ✓ succeeded | ✓ rejected |
-| A-22 | Malformed CXF document violating producer MUSTs | GAP-20 | ✓ succeeded | ✓ rejected |
+| A-15 | Silent exclusion of a passkey with a non-zero signature counter | GAP-33 | ✓ succeeded | ✓ succeeded |
+| A-16 | Stale CXF document accepted without freshness check | GAP-21 | ✓ succeeded | ✓ rejected |
+| A-17 | Exporter identity mismatch between CXP envelope and CXF header | GAP-22 | ✓ succeeded | ✓ rejected |
+| A-18 | Malformed CXF document violating producer MUSTs | GAP-20 | ✓ succeeded | ✓ rejected |
 
 ## Evidence
 
@@ -53,7 +53,7 @@ Generated: 2026-10-03T18:30:01.425Z
 ### A-06: Swapping or reordering files inside the archive
 
 - **spec-minimal**: succeeded — swapped archive imported 2 credential(s)
-- **hardened**: rejected — CXP-Export/documents/5xEqPWlIleiHj4Hm5tqkWQ.jwe does not match the manifest
+- **hardened**: rejected — CXP-Export/documents/SQGX6j01LlGknLUUi3aJFA.jwe does not match the manifest
 
 ### A-07: Credential injection by an unauthenticated exporter
 
@@ -82,7 +82,7 @@ Generated: 2026-10-03T18:30:01.425Z
 
 ### A-12: Metadata observable to a passive observer of the Export Response
 
-- **spec-minimal**: succeeded — file names expose Item IDs: CXP-Export/documents/ehGorEsDUVRsjYf_DoUV9A.jwe, CXP-Export/documents/5vJVauXBjUg8c2R5r_illA.jwe
+- **spec-minimal**: succeeded — file names expose Item IDs: CXP-Export/documents/fDXXk8IO6w3c1NoxTVk3qA.jwe, CXP-Export/documents/uMErsC1lJlR2Dh8QxR_Keg.jwe
 - **hardened**: reduced — file names randomized; 2 file sizes still observable
 
 ### A-13: Consent phishing: victim approves an attacker-crafted Export Request
@@ -95,22 +95,22 @@ Generated: 2026-10-03T18:30:01.425Z
 - **spec-minimal**: succeeded — scope tampering undetected; passkey-only=1, all-types=2; exporter served 1 credential(s)
 - **hardened**: rejected — export was not approved by the credential owner (GAP-29)
 
-### A-18: Silent exclusion of a passkey with a non-zero signature counter
+### A-15: Silent exclusion of a passkey with a non-zero signature counter
 
-- **spec-minimal**: succeeded — 1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-36 not implemented)
-- **hardened**: succeeded — 1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-36 not implemented)
+- **spec-minimal**: succeeded — 1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-33 not implemented)
+- **hardened**: succeeded — 1 passkey(s) silently excluded (signCount != 0); owner not notified (GAP-33 not implemented)
 
-### A-20: Stale CXF document accepted without freshness check
+### A-16: Stale CXF document accepted without freshness check
 
 - **spec-minimal**: succeeded — stale CXF document (timestamp 2h old) accepted without freshness check
 - **hardened**: rejected — CXF document predates the Export Request (GAP-21)
 
-### A-21: Exporter identity mismatch between CXP envelope and CXF header
+### A-17: Exporter identity mismatch between CXP envelope and CXF header
 
 - **spec-minimal**: succeeded — CXP exporter="adversary.example" vs CXF exporterRpId="provider-a.example"; mismatch accepted
 - **hardened**: rejected — CXF exporterRpId provider-a.example differs from response exporter adversary.example (GAP-22)
 
-### A-22: Malformed CXF document violating producer MUSTs
+### A-18: Malformed CXF document violating producer MUSTs
 
 - **spec-minimal**: succeeded — malformed CXF accepted at protocol level; 1 credential(s) skipped as invalid at import
 - **hardened**: rejected — CXF document violates producer requirements (GAP-20):
