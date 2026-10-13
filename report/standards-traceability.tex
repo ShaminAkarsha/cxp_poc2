@@ -1,0 +1,77 @@
+% Generated from docs/standards-traceability.json by `pnpm docs:traceability`. Do not edit by hand.
+% Requires \usepackage{longtable,booktabs,array} in the preamble.
+% Citations marked (section to verify) must be checked before submission.
+{\footnotesize
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{1.25cm}>{\raggedright\arraybackslash}p{1.15cm}>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}p{4.1cm}@{}}
+\caption{Standards relied on to complete and harden the CXP/CXF implementation}\label{tab:standards-traceability}\\
+\toprule
+\textbf{ID} & \textbf{Gap} & \textbf{Specification clause} & \textbf{Choice / control} & \textbf{Standard} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{ID} & \textbf{Gap} & \textbf{Specification clause} & \textbf{Choice / control} & \textbf{Standard} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{5}{r}{\textit{continued on next page}} \\
+\endfoot
+\endlastfoot
+\multicolumn{5}{l}{\textit{Completion choices (identical in both profiles)}} \\
+\midrule
+IMPL-01 & -- & CXP \S{}3.5.1 (kem, kdf, aead) & X25519 or P-256 KEM, HKDF-SHA256, AES-GCM; @hpke/core checked against RFC 9180 vectors & RFC 9180 \S{}7.1; RFC 9180 \S{}7.2; RFC 9180 \S{}7.3; RFC 9180 Appendix A \\
+IMPL-02 & -- & CXP \S{}3.5.1 (key) & OKP JWK for X25519, EC JWK for P-256; strict decoding & RFC 7517 \S{}4; RFC 8037 \S{}2; RFC 7518 \S{}6.2.1; RFC 9180 \S{}7.1.1 (section to verify) \\
+IMPL-03 & -- & CXP \S{}3.4 & Compact JWE, alg dir, enc A128GCM/A256GCM, algorithm allow-list on decrypt & RFC 7516 \S{}7.1; RFC 7518 \S{}4.5; RFC 7518 \S{}5.3; RFC 7516 \S{}4.1.3; RFC 8725 \S{}3.1 \\
+IMPL-04 & -- & CXF \S{}2.1 (b64url) & Emit unpadded canonical base64url & RFC 4648 \S{}5; RFC 7515 \S{}2 \\
+IMPL-05 & -- & CXF \S{}2.1, \S{}3.1.1 & Ignore-but-preserve unknown members; JSON-value round trip & RFC 8259 \S{}4; RFC 8610 Appendix E \\
+IMPL-06 & -- & CXF \S{}3.1 (timestamp), \S{}3.2.2, \S{}3.2.3 & uint64 fields limited to 0..2\textasciicircum{}53-1 & RFC 8259 \S{}6; RFC 7493 \S{}2.2 \\
+IMPL-07 & -- & CXP \S{}3.2.1, \S{}3.3 & UTF-8 JSON files with fixed names in a caller-chosen directory & RFC 8259 \S{}8.1 \\
+IMPL-08 & -- & CXP \S{}3.2.2 (direct) & HTTP POST /cxp/export on loopback, JSON bodies, 400 on error & RFC 9110 \S{}9.3.3; RFC 9110 \S{}15.5.1; RFC 8259 \S{}11 \\
+IMPL-09 & -- & CXF \S{}3.3.12 (key) & ES256 credentials, none attestation, canonical CBOR; importer accepts P-256 PKCS\#8 & W3C WebAuthn Level 3 \S{}8.7; W3C WebAuthn Level 3 \S{}6.3.3; RFC 9053 \S{}2.1; RFC 9053 (section to verify); RFC 8949 Appendix A; FIDO CTAP 2.1 (section to verify); RFC 5958 (section to verify) \\
+IMPL-10 & -- & CXF \S{}1.3 (Identifier) & Random 128-bit IDs, fixed per record, not derived from credential IDs & Design decision \\
+IMPL-11 & -- & CXF \S{}3.3 (Credential.type) & Other credential types kept opaque, not imported, reported & Design decision \\
+IMPL-12 & -- & Not CXP/CXF: W3C WebAuthn Level 3 RP ID validation & RP ID localhost; simplified client RP ID check & W3C WebAuthn Level 3 \S{}5.1.3; W3C Secure Contexts (section to verify) \\
+GAP-23 & GAP-23 & CXP \S{}3.2.2 (direct) & Read 'indirect' as 'direct' & Design decision \\
+GAP-24 & GAP-24 & CXP \S{}3.2 (version) & version 0 (CDDL .default) & RFC 8610 (section to verify) \\
+GAP-26 & GAP-26 & CXP \S{}3.2, \S{}3.5.1 & Prose wins over CDDL & RFC 8610 (section to verify) \\
+GAP-27 & GAP-27 & CXP \S{}3.5.3, \S{}3.4 & DEFLATE on zip entries; no JWE compression & RFC 1951; PKWARE APPNOTE.TXT (.ZIP File Format Specification) (section to verify) \\
+GAP-28 & GAP-28 & CXP \S{}3.3 (hpke) & Equal mode/kem/kdf/aead & Design decision \\
+\midrule
+\multicolumn{5}{l}{\textit{Hardening controls: closed by a policy flag}} \\
+\midrule
+GAP-01 & GAP-01 & CXP \S{}2 (step 1, 3), \S{}3.2/\S{}3.3 CDDL & Challenge + SHA-256(JCS(request)) bound into HPKE info (\texttt{bindRequestChallenge}) & RFC 9180 \S{}5.1; RFC 8785 \S{}3.2.3; FIPS 180-4 (section to verify); RFC 8446 \S{}4.4.1 \\
+GAP-02 & GAP-02 & CXP \S{}5 & MTI suite X25519 / HKDF-SHA256 / AES-256-GCM only (\texttt{enforceMandatorySuite}) & RFC 9180 \S{}7.1; RFC 9180 \S{}7.2; RFC 9180 \S{}7.3; RFC 7748; NIST SP 800-38D \\
+GAP-03 & GAP-03 & CXP \S{}3.2 (hpke), \S{}3.3 & Exporter must take the importer's first entries (\texttt{verifyNegotiatedSelection}) & RFC 8446 \S{}4.4.1 \\
+GAP-04 & GAP-04 & CXP \S{}3.3 (version) & Reject version below the requested one (\texttt{rejectVersionDowngrade}) & RFC 8446 \S{}4.1.3 \\
+GAP-05 & GAP-05 & CXP \S{}3.2 (importer), \S{}3.3 (exporter) & 128-bit fingerprint comparison by the user (\texttt{requireSasConfirmation}) & RFC 7638 \S{}3; RFC 8785 \S{}3.2.3; RFC 6189 (section to verify) \\
+GAP-06 & GAP-06 & CXP \S{}3.2.1, \S{}3.2.2 (indirect) & Request-file fingerprint confirmed before export (\texttt{confirmRequestFileKey}) & RFC 8785 \S{}3.2.3; FIPS 180-4 (section to verify) \\
+GAP-07 & GAP-07 & CXP \S{}3.4, \S{}3.5.1 & Per-file keys via HPKE secret export (label = path) (\texttt{deriveFileKeysViaExport}) & RFC 9180 \S{}5.3; RFC 7518 \S{}4.5; RFC 7518 \S{}5.3; NIST SP 800-38D (section to verify) \\
+GAP-08 & GAP-08 & CXP \S{}3.4 & Random 128-bit file names (\texttt{randomizeFileNames}) & RFC 6973 (section to verify) \\
+GAP-09 & GAP-09 & CXP \S{}3.4 & Path and request digest in the authenticated JWE header (\texttt{bindFileAad}) & RFC 7516 \S{}5.1; RFC 5116 (section to verify) \\
+GAP-10 & GAP-10 & CXP \S{}3.4 & SHA-256 manifest inside the encrypted index (\texttt{authenticateManifest}) & PKWARE APPNOTE.TXT (.ZIP File Format Specification) (section to verify); FIPS 180-4 (section to verify) \\
+GAP-11 & GAP-11 & CXP \S{}3.2, \S{}3.3 & Importer key discarded after first import (\texttt{singleUseImporterKey}) & NIST SP 800-57 Part 1 Rev. 5 (section to verify) \\
+GAP-12 & GAP-12 & CXP \S{}3.5.3, CXF \S{}3.3.12.5 & Entry/total size caps, payload cap, bounded largeBlob (\texttt{enforceDecompressionLimits}) & OWASP File Upload Cheat Sheet; PKWARE APPNOTE.TXT (.ZIP File Format Specification) (section to verify) \\
+GAP-13 & GAP-13 & CXP/CXF (no clause) & Best-effort zeroisation of buffers (\texttt{zeroizeKeyMaterial}) & NIST SP 800-57 Part 1 Rev. 5 (section to verify) \\
+GAP-14 & GAP-14 & CXP \S{}3.5.2 & HPKE auth mode with a confirmed exporter key (\texttt{requireHpkeAuthMode}) & RFC 9180 \S{}5.1.3; RFC 7638 \S{}3 \\
+GAP-19 & GAP-19 & CXP \S{}1.1, \S{}3.2.2 & TLS 1.3 with pinned per-run test CA (\texttt{requireTls}) & RFC 8446; RFC 5280 \S{}4.2.1.6; RFC 5280 \S{}4.2.1.9; RFC 5280 \S{}4.2.1.12; NIST SP 800-52 Rev. 2 (section to verify); OWASP Transport Layer Security Cheat Sheet \\
+GAP-20 & GAP-20 & CXF \S{}1.3, \S{}2.1, \S{}2.1.2, \S{}3.1.1, \S{}3.3.12, \S{}3.3.12.3 & Reject producer-MUST violations; canonical base64url (\texttt{strictCxfValidation}) & RFC 4648 \S{}3.2; RFC 4648 \S{}3.5; RFC 7515 \S{}2; RFC 5958 (section to verify); FIDO CTAP 2.1 (section to verify) \\
+GAP-21 & GAP-21 & CXF \S{}3.1 (timestamp) & Timestamp window with 300 s skew (\texttt{enforceTimestampFreshness}) & NIST SP 800-63B-4 (section to verify) \\
+GAP-22 & GAP-22 & CXF \S{}3.1 (exporterRpId), CXP \S{}3.3 (exporter) & exporterRpId must equal response exporter (\texttt{bindExporterIdentity}) & Design decision \\
+GAP-29 & GAP-29 & CXP \S{}2 (step 2), \S{}2.1 & Consent prompt bound to the request fingerprint (\texttt{requireExportConsent}) & OWASP Transaction Authorization Cheat Sheet; NIST SP 800-63B-4 (section to verify) \\
+GAP-30 & GAP-30 & CXP/CXF (no clause) & Never silently replace an existing credential (\texttt{rejectConflictingImport}) & Saltzer \& Schroeder, The Protection of Information in Computer Systems (1975) (section to verify) \\
+GAP-31 & GAP-31 & CXP \S{}3.2.1, \S{}3.2.2 (indirect) & 0600 files, deleted after import (\texttt{secureExportFiles}) & POSIX.1 (IEEE Std 1003.1), open()/file mode bits (section to verify); NIST SP 800-88 Rev. 1 (section to verify) \\
+\midrule
+\multicolumn{5}{l}{\textit{Hardening controls: closed through other flags}} \\
+\midrule
+GAP-18 & GAP-18 & CXF \S{}1.3 (Identifier) & Via GAP-08 random file names & RFC 6973 (section to verify) \\
+GAP-32 & GAP-32 & CXP \S{}3.2 (credentialTypes) & Via GAP-01/05/06 request binding & RFC 8785 \S{}3.2.3; RFC 9180 \S{}5.1 \\
+\midrule
+\multicolumn{5}{l}{\textit{Not closed in the PoC}} \\
+\midrule
+GAP-15 & GAP-15 & CXP \S{}1.1 & Not closed (out of scope) & Design decision \\
+GAP-16 & GAP-16 & CXF \S{}3.3.12.3 & Not closed (requires spec change) & Design decision \\
+GAP-17 & GAP-17 & CXF \S{}3.3.12 (note) & Not closed (requires spec change) & W3C WebAuthn Level 3 \S{}7.2 \\
+GAP-25 & GAP-25 & CXF \S{}3.3.12 (Passkey members) & Not closed (requires spec change) & W3C WebAuthn Level 3 \S{}6.1.3 (section to verify) \\
+GAP-33 & GAP-33 & CXF \S{}3.3.12 (note) & Not closed (not implemented) & Design decision \\
+\bottomrule
+\end{longtable}
+}

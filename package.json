@@ -20,7 +20,8 @@
     "demo:e2e": "tsx src/cli/demo-e2e.ts",
     "walkthrough": "tsx src/cli/walkthrough.ts",
     "dashboard": "tsx src/dashboard/main.ts",
-    "attack:all": "tsx src/cli/attack-all.ts"
+    "attack:all": "tsx src/cli/attack-all.ts",
+    "docs:traceability": "tsx scripts/build-traceability.ts"
   },
   "dependencies": {
     "@hpke/core": "^1.9.0",
